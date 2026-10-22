@@ -1,0 +1,4 @@
+# Container entrypoints must retain LF on Windows checkouts.
+gateway/*.sh text eol=lf
+gateway/bin/* text eol=lf
+gateway/Dockerfile text eol=lf
