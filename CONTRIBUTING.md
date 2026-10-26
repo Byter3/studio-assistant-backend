@@ -1,38 +1,38 @@
 # Contributing to the studio assistant backend
 
-This repository owns shared server setup and the optional LiteLLM stream adapter. Host UIs, project tools, command review, client credentials and local history belong in [Hou-lm](https://github.com/Byter3/Hou-lm) or [Ae-lm](https://github.com/Byter3/Ae-lm).
+This repository owns server setup and the optional LiteLLM streaming adapter. Application UIs, project tools, command review and local history belong in [Hou-lm](https://github.com/Byter3/Hou-lm) or [Ae-lm](https://github.com/Byter3/Ae-lm).
 
-Read [migration and provenance](docs/migration.md) before changing deployment paths, image names or service configuration. Repository organization and deployment changes must remain separate.
+## Offline checks and packaging
 
-## Offline checks
-
-Use Python 3.11, from the repository root:
+Use Python 3.11 from the repository root:
 
 ```sh
 python -m unittest discover -s tests -q
 python scripts/package_gateway.py
 ```
 
-These checks use synthetic events, temporary files and subprocess fixtures. They do not request a live model, access artist project data or deploy a server. The builder writes only the allowlisted adapter source archive into `dist/`.
+Tests use synthetic events, temporary files and subprocess fixtures. They do not contact a live model or deploy a server. The builder produces the allowlisted adapter source archive in `dist/`; keep generated archives out of Git.
 
-Tests requiring LiteLLM skip when it is not installed. POSIX-specific process/entrypoint tests skip on Windows. One retained optional integration test checks Hou-lm's parser only when its source is colocated; it skips in this standalone backend repository and is not a client dependency. Portable CI coverage does not establish actual provider compatibility.
+LiteLLM integration tests skip when that dependency is unavailable; POSIX checks skip on Windows. The optional check against Hou-lm's parser also skips when its source is not colocated. No sibling checkout is required for this backend or its clients.
 
-To validate the adapter against a supported LiteLLM environment, use an isolated dependency environment and the [gateway workflow](gateway/README.md). The adapter supports only verified package versions/source fingerprints. Do not bypass those checks to make an unsupported upgrade appear green. The image build runs offline checks with the existing base image's Python and dependencies; a build is still separate from selecting that image for a running service.
+Validate adapter compatibility in an isolated supported LiteLLM environment using the [gateway workflow](gateway/README.md). Do not bypass package-version or source-fingerprint checks. Record relevant passes and skips in the pull request; offline checks do not establish live provider or deployment compatibility.
 
 ## Change scope
 
-- Keep Compose, adapter behavior, compatibility fingerprints and deployment procedures independently reviewable.
-- Preserve complete tool arguments and assistant output; never replace a model request with a hardcoded artist-task recipe.
-- Keep startup diagnostics bounded and sanitized. Do not print raw credentials, prompts or provider responses in errors.
+- Keep Compose, adapter behavior, compatibility fingerprints and deployment changes independently reviewable.
+- Preserve complete tool arguments and assistant output. Do not add task-specific command recipes.
+- Keep startup errors bounded and sanitized; never print credentials, prompts or raw provider responses.
 - Keep the Docker context and source archive on explicit file allowlists.
-- Update compatibility tests alongside adapter changes and record skipped environments.
-- Retain the current deployment's stack name, volumes, credentials and rollback image when an independently authorized deployment is performed.
-- Application plug-ins must remain independently installable. Do not add host imports, a scene-routing service, a cross-client execution endpoint or a shared client dependency here.
+- Update regression checks when changing adapter behavior.
+- Preserve an existing deployment's [project identity, volumes and rollback options](docs/migration.md).
+- Keep application plug-ins independently installable. Do not add host imports, cross-client execution endpoints or runtime sibling-checkout dependencies.
 
-## Publishing
+A repository update or image build does not itself deploy a service. Keep real model requests and changes to running containers separate from offline checks.
 
-Review the exact staged files, commit metadata and archive entries before publication. Use a noreply author identity if desired. Never add populated `.env`, database/token-volume backups, private histories, keys or local diagnostic captures.
+## Release review
 
-CI uses read-only repository permissions and uploads a source bundle after offline checks pass. It does not publish a release or deploy a service. Release notes must state which dependency-specific and live-route checks actually ran. Do not claim that a successful Houdini interaction validates every backend image or an unimplemented After Effects client.
+Review the intended diff, commit metadata and archive entries. Exclude populated environments, credentials, database/token backups, private projects, histories and diagnostic captures. Use synthetic examples in tests and public reports.
+
+CI has read-only repository permissions and uploads the adapter source bundle after offline checks pass. It does not publish a release or deploy containers. State the supported dependency versions and the checks actually performed in release notes.
 
 Contributions are under the [MIT license](LICENSE).

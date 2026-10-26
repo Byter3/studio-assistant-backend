@@ -1,28 +1,26 @@
-# Backend security boundaries
+# Security
 
-This repository contains an optional server example and a narrowly version-checked gateway adapter. It does not certify a live deployment's authentication, network exposure, installed container binaries or multi-user isolation.
+## Credentials and project data
 
-## Credentials and data
-
-- `.env.example` is deliberately empty. Populated environment files, provider keys, LiteLLM administration keys, user tokens and volume backups are private deployment data.
-- Artists connect with their own Open WebUI user keys. Use restricted LiteLLM virtual keys for the Open WebUI-to-LiteLLM connection and reserve master credentials for administration.
-- Open WebUI and upstream providers can receive client prompts, bounded project observations and tool results. Configure retention and access controls for the studio's project data.
-- Keep the LiteLLM salt key with protected database backups; retaining database files without the required secret is not a complete recovery plan.
+- Only the empty `.env.example` belongs in the repository. Keep populated environments, provider keys, user tokens and volume backups private.
+- Artists use their own Open WebUI keys. Use restricted LiteLLM virtual keys for the Open WebUI connection and reserve the master key for administration.
+- The configured service and upstream providers receive prompts, bounded project observations, tool results and any images submitted by clients. Configure access and retention for studio data.
+- Keep the LiteLLM salt key with protected database backups so stored credentials remain recoverable.
 
 ## Network and execution
 
-The Compose example publishes HTTP ports 8088 and 4000 on host interfaces. It does not set up TLS, a reverse proxy or firewall rules. Configure authenticated access and HTTPS or an appropriately protected transport before using it in a studio environment. Floating image tags require deployment-specific review and version recording.
+The Compose example publishes plain HTTP ports 8088 and 4000 on host interfaces. It does not configure TLS, a reverse proxy or firewall rules. Set up protected access and select tested image versions for your environment; the example uses floating tags.
 
-Host tool execution remains inside the originating client application. An attacker who controls model output or can modify unencrypted response traffic may influence commands offered to the artist; client review and Auto-run are not a sandbox. This repository adds no workstation listener or generic remote host-execution endpoint.
+Tool execution stays inside the originating application. Model output can influence commands offered to artists, and Auto-run is not a sandbox. Use trusted connections and review permissions appropriate to the project. This backend provides no workstation listener or generic remote host-execution endpoint.
 
-The optional adapter rejects unsupported source versions and conflicting/incomplete streams. Its checks are compatibility guardrails, not a general security boundary for LiteLLM or its provider dependencies.
+The optional adapter's version and source checks establish compatibility for the supported paths, not general security of LiteLLM or its dependencies.
 
-## Packaging and provenance
+## Build and update
 
-The adapter source archive and Docker context use explicit allowlists. Build from a trusted checkout and inspect archive contents before sharing. The inherited source builder rejects leaf symlinks but does not yet reject linked parent directories; parent-link/containment hardening is a separate pending improvement, not part of the unchanged extraction.
+Build from a trusted checkout and inspect source archives before sharing. Archive and Docker inputs use explicit allowlists. The source packager rejects leaf symlinks but does not reject linked parent directories; ensure the checkout and its parent directories are trusted.
 
-The legacy image and artifact names are kept for compatibility. Updating a repository checkout does not authorize changing running containers. See [migration](docs/migration.md) for preserved deployment identity.
+Preserve deployment identity, credentials and persistent data when updating; see [Updating an existing installation](docs/migration.md). Back up before replacing running services.
 
-## Reporting
+## Report a vulnerability
 
-Use private GitHub vulnerability reporting if enabled. Otherwise request a private reporting channel before sharing sensitive material. Public reports should use synthetic reproductions and sanitized counters, never secrets, full project histories, provider responses or production configuration.
+Use private GitHub vulnerability reporting if enabled. Otherwise request a private reporting channel before sharing sensitive material. Public reports should contain synthetic reproductions and sanitized errors, never secrets, project histories or production configuration.
